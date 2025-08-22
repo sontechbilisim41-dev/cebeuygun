@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kurye Ödeme Raporu</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3B82F6;
+            padding-bottom: 20px;
+        }
+        .company-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3B82F6;
+            margin-bottom: 10px;
+        }
+        .report-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .report-period {
+            font-size: 14px;
+            color: #666;
+        }
+        .courier-info {
+            background: #F8FAFC;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .summary-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3B82F6;
+            margin-bottom: 5px;
+        }
+        .summary-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .breakdown-section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1F2937;
+            border-bottom: 1px solid #E5E7EB;
+            padding-bottom: 5px;
+        }
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .breakdown-item {
+            background: #F9FAFB;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .breakdown-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #059669;
+        }
+        .breakdown-label {
+            font-size: 11px;
+            color: #666;
+        }
+        .daily-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .daily-table th,
+        .daily-table td {
+            border: 1px solid #E5E7EB;
+            padding: 8px;
+            text-align: center;
+        }
+        .daily-table th {
+            background: #F3F4F6;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .daily-table td {
+            font-size: 11px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #E5E7EB;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .highlight {
+            background: #FEF3C7;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .peak-hour {
+            color: #D97706;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-logo">CEBEUYGUN</div>
+        <div class="report-title">Kurye Ödeme Raporu</div>
+        <div class="report-period">{{formattedPeriod}} ({{period.year}} - {{period.weekNumber}}. Hafta)</div>
+    </div>
+
+    <div class="courier-info">
+        <strong>Kurye:</strong> {{courierName}} <br>
+        <strong>Kurye ID:</strong> {{courierId}} <br>
+        <strong>Rapor Tarihi:</strong> {{generatedAt}}
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-value">{{summary.totalDeliveries}}</div>
+            <div class="summary-label">Toplam Teslimat</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value">{{formatNumber summary.totalDistance 1}} km</div>
+            <div class="summary-label">Toplam Mesafe</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value">{{summary.totalEarningsFormatted}}</div>
+            <div class="summary-label">Toplam Kazanç</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-value">{{summary.averageEarningPerDeliveryFormatted}}</div>
+            <div class="summary-label">Teslimat Başı Ortalama</div>
+        </div>
+    </div>
+
+    <div class="breakdown-section">
+        <div class="section-title">Kazanç Dağılımı</div>
+        <div class="breakdown-grid">
+            <div class="breakdown-item">
+                <div class="breakdown-value">{{summary.baseEarningsFormatted}}</div>
+                <div class="breakdown-label">Temel Ücret</div>
+            </div>
+            <div class="breakdown-item">
+                <div class="breakdown-value">{{summary.distanceEarningsFormatted}}</div>
+                <div class="breakdown-label">Mesafe Ücreti</div>
+            </div>
+            <div class="breakdown-item">
+                <div class="breakdown-value">{{summary.bonusEarningsFormatted}}</div>
+                <div class="breakdown-label">Bonus Ödemeler</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="breakdown-section">
+        <div class="section-title">Çalışma Saatleri Analizi</div>
+        <div class="breakdown-grid">
+            <div class="breakdown-item">
+                <div class="breakdown-value">{{breakdown.regularHours.deliveries}}</div>
+                <div class="breakdown-label">Normal Saat Teslimat</div>
+                <div class="breakdown-value">{{formatMoney breakdown.regularHours.earnings}}</div>
+            </div>
+            <div class="breakdown-item highlight">
+                <div class="breakdown-value peak-hour">{{breakdown.peakHours.deliveries}}</div>
+                <div class="breakdown-label">Pik Saat Teslimat</div>
+                <div class="breakdown-value peak-hour">{{formatMoney breakdown.peakHours.earnings}}</div>
+                <div class="breakdown-label">Bonus: {{formatMoney breakdown.peakHours.bonusAmount}}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="breakdown-section">
+        <div class="section-title">Günlük Detay</div>
+        <table class="daily-table">
+            <thead>
+                <tr>
+                    <th>Tarih</th>
+                    <th>Teslimat Sayısı</th>
+                    <th>Pik Saat Teslimat</th>
+                    <th>Günlük Kazanç</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each breakdown.byDay}}
+                <tr>
+                    <td>{{formatDate date 'dd.MM.yyyy'}}</td>
+                    <td>{{deliveries}}</td>
+                    <td>{{#if (gt peakHourDeliveries 0)}}<span class="peak-hour">{{peakHourDeliveries}}</span>{{else}}0{{/if}}</td>
+                    <td>{{formatMoney earnings}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+    {{#if deliveries}}
+    <div class="breakdown-section">
+        <div class="section-title">Teslimat Detayları</div>
+        <table class="daily-table">
+            <thead>
+                <tr>
+                    <th>Teslimat ID</th>
+                    <th>Tarih</th>
+                    <th>Mesafe</th>
+                    <th>Temel</th>
+                    <th>Mesafe</th>
+                    <th>Bonus</th>
+                    <th>Toplam</th>
+                    <th>Pik Saat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each deliveries}}
+                <tr>
+                    <td>{{deliveryId}}</td>
+                    <td>{{formatDate calculatedAt 'dd.MM HH:mm'}}</td>
+                    <td>{{formatNumber calculationDetails.distance 2}} km</td>
+                    <td>{{formatMoney baseEarning}}</td>
+                    <td>{{formatMoney distanceEarning}}</td>
+                    <td>{{formatMoney peakHourBonus}}</td>
+                    <td><strong>{{formatMoney totalEarning}}</strong></td>
+                    <td>{{#if calculationDetails.isPeakHour}}<span class="peak-hour">✓</span>{{else}}-{{/if}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+    {{/if}}
+
+    <div class="footer">
+        <p><strong>Cebeuygun Kurye Hizmetleri</strong></p>
+        <p>Bu rapor otomatik olarak oluşturulmuştur. Sorularınız için destek ekibimizle iletişime geçin.</p>
+        <p>Rapor Oluşturma Tarihi: {{generatedAt}}</p>
+    </div>
+</body>
+</html>
