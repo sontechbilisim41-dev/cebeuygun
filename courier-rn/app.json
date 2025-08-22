@@ -1,0 +1,71 @@
+{
+  "expo": {
+    "name": "Courier App",
+    "slug": "courier-mobile-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.courierapp.mobile",
+      "infoPlist": {
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Bu uygulama teslimat sırasında konumunuzu takip etmek için konum bilgilerinizi kullanır.",
+        "NSLocationWhenInUseUsageDescription": "Bu uygulama teslimat rotalarını göstermek için konum bilgilerinizi kullanır.",
+        "NSCameraUsageDescription": "Teslimat kanıtı fotoğrafı çekmek için kamera erişimi gereklidir.",
+        "NSMicrophoneUsageDescription": "Müşteri ile iletişim için mikrofon erişimi gereklidir.",
+        "UIBackgroundModes": ["location", "background-fetch", "background-processing"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#667eea"
+      },
+      "package": "com.courierapp.mobile",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "CALL_PHONE",
+        "WAKE_LOCK",
+        "RECEIVE_BOOT_COMPLETED"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-location",
+      "expo-camera",
+      "expo-notifications",
+      [
+        "expo-background-fetch",
+        {
+          "backgroundFetchInterval": 15
+        }
+      ],
+      [
+        "expo-task-manager",
+        {
+          "backgroundTasks": ["location-tracking"]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "courier-mobile-app"
+      }
+    }
+  }
+}
