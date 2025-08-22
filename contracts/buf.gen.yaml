@@ -1,0 +1,18 @@
+version: v1
+plugins:
+  - plugin: buf.build/protocolbuffers/go
+    out: generated/go
+    opt:
+      - paths=source_relative
+  - plugin: buf.build/protocolbuffers/go-grpc
+    out: generated/go
+    opt:
+      - paths=source_relative
+  - plugin: buf.build/bufbuild/es
+    out: generated/ts
+    opt:
+      - target=ts
+  - plugin: buf.build/connectrpc/es
+    out: generated/ts
+    opt:
+      - target=ts

@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package auth.v1;
+
+import "common/v1/common.proto";
+
+option go_package = "github.com/cebeuygun/platform/contracts/auth/v1";
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+}
+
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;
+  USER_ROLE_CUSTOMER = 1;
+  USER_ROLE_SELLER = 2;
+  USER_ROLE_COURIER = 3;
+  USER_ROLE_ADMIN = 4;
+}
+
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  USER_STATUS_PENDING = 1;
+  USER_STATUS_ACTIVE = 2;
+  USER_STATUS_SUSPENDED = 3;
+  USER_STATUS_BANNED = 4;
+}
+
+message User {
+  common.v1.BaseEntity base = 1;
+  string email = 2;
+  string phone = 3;
+  string first_name = 4;
+  string last_name = 5;
+  UserRole role = 6;
+  UserStatus status = 7;
+  bool email_verified = 8;
+  bool phone_verified = 9;
+  common.v1.Location location = 10;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string phone = 3;
+  string first_name = 4;
+  string last_name = 5;
+  UserRole role = 6;
+}
+
+message RegisterResponse {
+  common.v1.BaseResponse base = 1;
+  User user = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  common.v1.BaseResponse base = 1;
+  User user = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  common.v1.BaseResponse base = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+}
+
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateTokenResponse {
+  common.v1.BaseResponse base = 1;
+  User user = 2;
+}
+
+message LogoutRequest {
+  string access_token = 1;
+}
+
+message LogoutResponse {
+  common.v1.BaseResponse base = 1;
+}
+
+message ForgotPasswordRequest {
+  string email = 1;
+}
+
+message ForgotPasswordResponse {
+  common.v1.BaseResponse base = 1;
+}
+
+message ResetPasswordRequest {
+  string token = 1;
+  string new_password = 2;
+}
+
+message ResetPasswordResponse {
+  common.v1.BaseResponse base = 1;
+}

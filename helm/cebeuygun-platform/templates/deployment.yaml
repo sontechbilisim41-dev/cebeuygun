@@ -1,0 +1,129 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $serviceName }}-service
+  labels:
+    {{- include "cebeuygun-platform.labels" $ | nindent 4 }}
+    app: {{ $serviceName }}-service
+    service: {{ $serviceName }}
+    version: stable
+spec:
+  replicas: {{ $service.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ $serviceName }}-service
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: {{ $serviceName }}-service
+        service: {{ $serviceName }}
+        version: stable
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ $service.service.port }}"
+        prometheus.io/path: "/metrics"
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+    spec:
+      serviceAccountName: {{ $serviceName }}-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: {{ $serviceName }}-service
+          image: "{{ $.Values.global.imageRegistry }}/{{ $service.image.repository }}:{{ $service.image.tag }}"
+          imagePullPolicy: {{ $service.image.pullPolicy | default "IfNotPresent" }}
+          ports:
+            - name: http
+              containerPort: {{ $service.service.port }}
+              protocol: TCP
+          env:
+            - name: SERVICE_NAME
+              value: "{{ $serviceName }}-service"
+            - name: SERVICE_VERSION
+              value: "{{ $service.image.tag }}"
+            - name: ENVIRONMENT
+              value: {{ $.Values.global.environment | default "production" }}
+            - name: OTEL_COLLECTOR_URL
+              value: "http://otel-collector.observability.svc.cluster.local:4318"
+            - name: NODE_OPTIONS
+              value: "--require /app/instrumentation.js"
+            {{- if $.Values.postgresql.enabled }}
+            - name: DB_HOST
+              value: "{{ include "cebeuygun-platform.postgresql.fullname" $ }}"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cebeuygun-platform.postgresql.secretName" $ }}
+                  key: postgres-password
+            {{- end }}
+            {{- if $.Values.redis.enabled }}
+            - name: REDIS_URL
+              value: "redis://:$(REDIS_PASSWORD)@{{ include "cebeuygun-platform.redis.fullname" $ }}:6379/0"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cebeuygun-platform.redis.secretName" $ }}
+                  key: redis-password
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "cebeuygun-platform.fullname" $ }}-config
+            - secretRef:
+                name: {{ include "cebeuygun-platform.fullname" $ }}-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml $service.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/cache
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+      {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{ $serviceName }}-service
+                topologyKey: kubernetes.io/hostname
+{{- end }}
+{{- end }}

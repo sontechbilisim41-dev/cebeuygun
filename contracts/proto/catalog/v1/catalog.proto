@@ -1,0 +1,177 @@
+syntax = "proto3";
+
+package catalog.v1;
+
+import "common/v1/common.proto";
+
+option go_package = "github.com/cebeuygun/platform/contracts/catalog/v1";
+
+service CatalogService {
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc SearchProducts(SearchProductsRequest) returns (SearchProductsResponse);
+  
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
+  rpc GetCategory(GetCategoryRequest) returns (GetCategoryResponse);
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+}
+
+enum ProductStatus {
+  PRODUCT_STATUS_UNSPECIFIED = 0;
+  PRODUCT_STATUS_DRAFT = 1;
+  PRODUCT_STATUS_ACTIVE = 2;
+  PRODUCT_STATUS_OUT_OF_STOCK = 3;
+  PRODUCT_STATUS_DISCONTINUED = 4;
+}
+
+message Category {
+  common.v1.BaseEntity base = 1;
+  string name = 2;
+  string description = 3;
+  string image_url = 4;
+  string parent_id = 5;
+  int32 sort_order = 6;
+  bool is_active = 7;
+}
+
+message ProductVariant {
+  string id = 1;
+  string name = 2;
+  string sku = 3;
+  common.v1.Money price = 4;
+  common.v1.Money compare_at_price = 5;
+  int32 inventory_quantity = 6;
+  map<string, string> attributes = 7;
+  repeated string image_urls = 8;
+}
+
+message Product {
+  common.v1.BaseEntity base = 1;
+  string seller_id = 2;
+  string name = 3;
+  string description = 4;
+  string category_id = 5;
+  ProductStatus status = 6;
+  repeated string tags = 7;
+  repeated string image_urls = 8;
+  repeated ProductVariant variants = 9;
+  common.v1.Money min_price = 10;
+  common.v1.Money max_price = 11;
+  float rating = 12;
+  int32 review_count = 13;
+  map<string, string> attributes = 14;
+  bool is_express_delivery = 15;
+  int32 preparation_time_minutes = 16;
+}
+
+message CreateProductRequest {
+  string seller_id = 1;
+  string name = 2;
+  string description = 3;
+  string category_id = 4;
+  repeated string tags = 5;
+  repeated string image_urls = 6;
+  repeated ProductVariant variants = 7;
+  map<string, string> attributes = 8;
+  bool is_express_delivery = 9;
+  int32 preparation_time_minutes = 10;
+}
+
+message CreateProductResponse {
+  common.v1.BaseResponse base = 1;
+  Product product = 2;
+}
+
+message GetProductRequest {
+  string id = 1;
+}
+
+message GetProductResponse {
+  common.v1.BaseResponse base = 1;
+  Product product = 2;
+}
+
+message UpdateProductRequest {
+  string id = 1;
+  Product product = 2;
+}
+
+message UpdateProductResponse {
+  common.v1.BaseResponse base = 1;
+  Product product = 2;
+}
+
+message DeleteProductRequest {
+  string id = 1;
+}
+
+message DeleteProductResponse {
+  common.v1.BaseResponse base = 1;
+}
+
+message ListProductsRequest {
+  string seller_id = 1;
+  string category_id = 2;
+  ProductStatus status = 3;
+  common.v1.Pagination pagination = 4;
+}
+
+message ListProductsResponse {
+  common.v1.BaseResponse base = 1;
+  repeated Product products = 2;
+  common.v1.Pagination pagination = 3;
+}
+
+message SearchProductsRequest {
+  string query = 1;
+  string category_id = 2;
+  common.v1.Money min_price = 3;
+  common.v1.Money max_price = 4;
+  repeated string tags = 5;
+  bool express_delivery_only = 6;
+  common.v1.Location location = 7;
+  common.v1.Pagination pagination = 8;
+}
+
+message SearchProductsResponse {
+  common.v1.BaseResponse base = 1;
+  repeated Product products = 2;
+  common.v1.Pagination pagination = 3;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string description = 2;
+  string image_url = 3;
+  string parent_id = 4;
+  int32 sort_order = 5;
+}
+
+message CreateCategoryResponse {
+  common.v1.BaseResponse base = 1;
+  Category category = 2;
+}
+
+message GetCategoryRequest {
+  string id = 1;
+}
+
+message GetCategoryResponse {
+  common.v1.BaseResponse base = 1;
+  Category category = 2;
+}
+
+message ListCategoriesRequest {
+  string parent_id = 1;
+  bool only_active = 2;
+  common.v1.Pagination pagination = 3;
+}
+
+message ListCategoriesResponse {
+  common.v1.BaseResponse base = 1;
+  repeated Category categories = 2;
+  common.v1.Pagination pagination = 3;
+}

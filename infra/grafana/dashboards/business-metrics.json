@@ -1,0 +1,176 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Business Metrics",
+    "tags": ["business", "kpi"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Daily GMV",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(order_total_amount_sum[24h]))",
+            "legendFormat": "GMV (24h)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 50000},
+                {"color": "red", "value": 100000}
+              ]
+            },
+            "unit": "currencyTRY"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Order Volume",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(orders_created_total[24h]))",
+            "legendFormat": "Orders (24h)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Average Delivery Time",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(delivery_duration_minutes)",
+            "legendFormat": "Avg Delivery Time"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 30},
+                {"color": "red", "value": 45}
+              ]
+            },
+            "unit": "m"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Cancellation Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(orders_cancelled_total[24h])) / sum(increase(orders_created_total[24h]))",
+            "legendFormat": "Cancellation Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.05},
+                {"color": "red", "value": 0.1}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Order Trends",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(orders_created_total[5m])) by (status)",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "ops"
+          }
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Revenue by Region",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(increase(order_total_amount_sum[24h])) by (region)",
+            "legendFormat": "{{region}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "currencyTRY"
+          }
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 7,
+        "title": "Top Products",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, sum(increase(product_orders_total[24h])) by (product_name))",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "list"
+            }
+          }
+        },
+        "gridPos": {"h": 10, "w": 12, "x": 0, "y": 17}
+      },
+      {
+        "id": 8,
+        "title": "Delivery Performance",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum(rate(delivery_duration_minutes_bucket[5m])) by (le)",
+            "legendFormat": "{{le}}"
+          }
+        ],
+        "gridPos": {"h": 10, "w": 12, "x": 12, "y": 17}
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "refresh": "1m"
+  }
+}

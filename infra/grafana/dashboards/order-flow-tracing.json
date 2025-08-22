@@ -1,0 +1,81 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Order Flow Tracing",
+    "tags": ["tracing", "order-flow"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Order Flow Overview",
+        "type": "traces",
+        "targets": [
+          {
+            "query": "{service.name=\"order-service\"} | select(.order_id)",
+            "queryType": "traceql"
+          }
+        ],
+        "gridPos": {"h": 12, "w": 24, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Service Dependencies",
+        "type": "nodeGraph",
+        "targets": [
+          {
+            "expr": "sum(rate(traces_service_graph_request_total[5m])) by (client, server)",
+            "legendFormat": "{{client}} -> {{server}}"
+          }
+        ],
+        "gridPos": {"h": 10, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 3,
+        "title": "Trace Duration Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "sum(rate(traces_duration_milliseconds_bucket[5m])) by (le, service_name)",
+            "legendFormat": "{{service_name}}"
+          }
+        ],
+        "gridPos": {"h": 10, "w": 12, "x": 12, "y": 12}
+      },
+      {
+        "id": 4,
+        "title": "Critical Path Analysis",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(span_duration_milliseconds_bucket{span_name=~\"order.*\"}[5m])) by (le, span_name))",
+            "legendFormat": "{{span_name}} (95th)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "ms"
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 22}
+      },
+      {
+        "id": 5,
+        "title": "Error Traces",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{service_name=~\".*\"} |= \"ERROR\" | json",
+            "queryType": "range"
+          }
+        ],
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 30}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

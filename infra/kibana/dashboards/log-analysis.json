@@ -1,0 +1,23 @@
+{
+  "version": "8.8.0",
+  "objects": [
+    {
+      "id": "log-analysis-dashboard",
+      "type": "dashboard",
+      "attributes": {
+        "title": "Log Analysis Dashboard",
+        "hits": 0,
+        "description": "Comprehensive log analysis for microservices",
+        "panelsJSON": "[{\"version\":\"8.8.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"title\":\"Error Logs by Service\"},\"panelRefName\":\"panel_1\"},{\"version\":\"8.8.0\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"title\":\"Log Volume Over Time\"},\"panelRefName\":\"panel_2\"},{\"version\":\"8.8.0\",\"gridData\":{\"x\":0,\"y\":15,\"w\":48,\"h\":20,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"title\":\"Recent Error Logs\"},\"panelRefName\":\"panel_3\"},{\"version\":\"8.8.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":15,\"i\":\"4\"},\"panelIndex\":\"4\",\"embeddableConfig\":{\"title\":\"Order Flow Logs\"},\"panelRefName\":\"panel_4\"},{\"version\":\"8.8.0\",\"gridData\":{\"x\":24,\"y\":35,\"w\":24,\"h\":15,\"i\":\"5\"},\"panelIndex\":\"5\",\"embeddableConfig\":{\"title\":\"Payment Processing Logs\"},\"panelRefName\":\"panel_5\"}]",
+        "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"hidePanelTitles\":false}",
+        "timeRestore": false,
+        "timeTo": "now",
+        "timeFrom": "now-24h",
+        "refreshInterval": {
+          "pause": false,
+          "value": 30000
+        }
+      }
+    }
+  ]
+}

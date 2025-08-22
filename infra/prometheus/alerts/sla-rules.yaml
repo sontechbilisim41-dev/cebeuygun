@@ -1,0 +1,156 @@
+groups:
+  - name: sla.rules
+    interval: 30s
+    rules:
+      # SLA: 99.9% uptime (< 0.1% error rate)
+      - alert: SLAViolation_ErrorRate
+        expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) > 0.001
+        for: 5m
+        labels:
+          severity: critical
+          sla: "availability"
+          team: platform
+        annotations:
+          summary: "SLA violation: Error rate exceeds 0.1%"
+          description: "Error rate is {{ $value | humanizePercentage }} (SLA: < 0.1%)"
+          runbook_url: "https://runbooks.cebeuygun.com/sla-violation-error-rate"
+
+      # SLA: 95th percentile response time < 300ms
+      - alert: SLAViolation_ResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.3
+        for: 5m
+        labels:
+          severity: critical
+          sla: "performance"
+          team: platform
+        annotations:
+          summary: "SLA violation: Response time exceeds 300ms"
+          description: "95th percentile response time is {{ $value }}s (SLA: < 300ms)"
+          runbook_url: "https://runbooks.cebeuygun.com/sla-violation-response-time"
+
+      # SLA: Order processing time < 5 minutes
+      - alert: SLAViolation_OrderProcessing
+        expr: histogram_quantile(0.95, sum(rate(order_processing_duration_seconds_bucket[5m])) by (le)) > 300
+        for: 2m
+        labels:
+          severity: critical
+          sla: "business"
+          team: business
+        annotations:
+          summary: "SLA violation: Order processing time exceeds 5 minutes"
+          description: "95th percentile order processing time is {{ $value }}s (SLA: < 300s)"
+          runbook_url: "https://runbooks.cebeuygun.com/sla-violation-order-processing"
+
+      # SLA: Payment success rate > 99%
+      - alert: SLAViolation_PaymentSuccess
+        expr: (sum(rate(payment_failures_total[5m])) / sum(rate(payment_attempts_total[5m]))) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          sla: "payments"
+          team: payments
+        annotations:
+          summary: "SLA violation: Payment failure rate exceeds 1%"
+          description: "Payment failure rate is {{ $value | humanizePercentage }} (SLA: < 1%)"
+          runbook_url: "https://runbooks.cebeuygun.com/sla-violation-payment-success"
+
+      # SLA: Delivery time < 45 minutes (95th percentile)
+      - alert: SLAViolation_DeliveryTime
+        expr: histogram_quantile(0.95, sum(rate(delivery_duration_minutes_bucket[10m])) by (le)) > 45
+        for: 10m
+        labels:
+          severity: warning
+          sla: "delivery"
+          team: logistics
+        annotations:
+          summary: "SLA violation: Delivery time exceeds 45 minutes"
+          description: "95th percentile delivery time is {{ $value }} minutes (SLA: < 45 minutes)"
+          runbook_url: "https://runbooks.cebeuygun.com/sla-violation-delivery-time"
+
+  - name: business.rules
+    interval: 1m
+    rules:
+      # Business Critical Alerts
+      - alert: OrderVolumeDropped
+        expr: sum(rate(orders_created_total[10m])) < 0.5 * sum(rate(orders_created_total[1h] offset 1h))
+        for: 5m
+        labels:
+          severity: critical
+          team: business
+        annotations:
+          summary: "Order volume dropped significantly"
+          description: "Current order rate is 50% below the rate from 1 hour ago"
+
+      - alert: PaymentGatewayDown
+        expr: up{job="payment-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: payments
+        annotations:
+          summary: "Payment gateway is down"
+          description: "Payment service is not responding"
+
+      - alert: HighCancellationRate
+        expr: (sum(rate(orders_cancelled_total[15m])) / sum(rate(orders_created_total[15m]))) > 0.15
+        for: 10m
+        labels:
+          severity: warning
+          team: business
+        annotations:
+          summary: "High order cancellation rate"
+          description: "Cancellation rate is {{ $value | humanizePercentage }} (threshold: 15%)"
+
+      - alert: CourierShortage
+        expr: count(courier_status{status="available"}) < 5
+        for: 5m
+        labels:
+          severity: warning
+          team: logistics
+        annotations:
+          summary: "Courier shortage detected"
+          description: "Only {{ $value }} couriers available"
+
+  - name: infrastructure.rules
+    interval: 30s
+    rules:
+      # Infrastructure Alerts
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Disk space low"
+          description: "Disk space is {{ $value | humanizePercentage }} full"
+
+      - alert: DatabaseConnectionsHigh
+        expr: pg_stat_activity_count > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+        annotations:
+          summary: "High database connections"
+          description: "{{ $value }} active database connections"

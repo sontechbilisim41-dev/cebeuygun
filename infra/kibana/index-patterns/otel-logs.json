@@ -1,0 +1,14 @@
+{
+  "version": "8.8.0",
+  "objects": [
+    {
+      "id": "otel-logs-*",
+      "type": "index-pattern",
+      "attributes": {
+        "title": "otel-logs-*",
+        "timeFieldName": "@timestamp",
+        "fields": "[{\"name\":\"@timestamp\",\"type\":\"date\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"service.name\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"service.version\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"log.level\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"message\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":false},{\"name\":\"trace.id\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"span.id\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"user.id\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"order.id\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"error.type\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":true},{\"name\":\"error.message\",\"type\":\"string\",\"searchable\":true,\"aggregatable\":false}]"
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package common.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/cebeuygun/platform/contracts/common/v1";
+
+message Pagination {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 total_pages = 4;
+}
+
+message Location {
+  double latitude = 1;
+  double longitude = 2;
+  string address = 3;
+  string city = 4;
+  string district = 5;
+  string postal_code = 6;
+}
+
+message Money {
+  string currency = 1;
+  int64 amount = 2; // Amount in cents
+}
+
+message BaseResponse {
+  bool success = 1;
+  string message = 2;
+  int32 code = 3;
+}
+
+message BaseEntity {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+}
